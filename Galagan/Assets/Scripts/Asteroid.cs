@@ -1,69 +1,36 @@
+using System;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
 public class Asteroid : MonoBehaviour
 {
-    private PolygonCollider2D _polygonCollider;
-    private LineRenderer _lineRenderer;
-    public new Rigidbody2D rigidbody;
-    
-    [Range(0.1f, 10f)]
-    public float radius = 2f;
-    [Range(0.1f, 10f)]
-    public float jaggedness = 1.5f;
-    [SerializeField, Range(3, 150)]
-    public int pointCountLow = 8;
-    [SerializeField, Range(3, 150)]
-    public int pointCountHigh = 12;
+    private Rigidbody2D _rigidbody;
+    private bool _correcting;
 
     private void Awake()
     {
-        _lineRenderer = GetComponent<LineRenderer>();
-        _polygonCollider = GetComponent<PolygonCollider2D>();
-        rigidbody = GetComponent<Rigidbody2D>();
-        
-        // Set white color
-        _lineRenderer.startColor = Color.white;
-        _lineRenderer.endColor = Color.white;
-        _lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
+        _rigidbody = GetComponent<Rigidbody2D>();
     }
 
-    void Start()
+    private void FixedUpdate()
     {
-        GenerateLine();
-    }
-    
-    void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Space))
+        // If asteroids get too slow or stop, begin adding force to correct
+        if (_rigidbody.velocity.y > -0.1f)
         {
-            GenerateLine();
+            _correcting = true;
         }
-    }   
 
-    void GenerateLine()
-    {
-        _lineRenderer.positionCount = Random.Range(pointCountLow, pointCountHigh);
-        _lineRenderer.loop = true;
-
-        var previousRadius = radius;
-        for (var i = 0; i < _lineRenderer.positionCount; i++)
+        if (_correcting)
         {
-            var angle = i * Mathf.PI * 2 / _lineRenderer.positionCount;
-            var pointRadius = previousRadius * 0.2f + (radius + Random.Range(0, jaggedness)) * 0.8f;
-            _lineRenderer.SetPosition(i, new Vector3(pointRadius * Mathf.Cos(angle), pointRadius * Mathf.Sin(angle), 0));
-            previousRadius = pointRadius;
+            if (_rigidbody.velocity.y > -2f)
+            {
+                _rigidbody.AddForce(new Vector2(0, -5f));
+            }
+            else
+            {
+                // If the asteroid is now moving fast enough, stop correcting
+                _correcting = false;
+            }
         }
-        
-        // Use the line render to create collider path
-        var path = new Vector2[_lineRenderer.positionCount + 1];
-        for (var i = 0; i < _lineRenderer.positionCount; i++)
-        {
-            var p = _lineRenderer.GetPosition(i);
-            path[i] = new Vector2(p.x, p.y);
-        }
-        path[_lineRenderer.positionCount] = path[0];
-        
-        _polygonCollider.SetPath(0, path);
     }
 }
