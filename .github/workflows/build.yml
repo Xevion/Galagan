@@ -12,8 +12,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
+    strategy:matrix:
         unityVersion:
           - 2022.3.42f1
         targetPlatform:
@@ -47,6 +46,8 @@ jobs:
       - name: Fix Build Folder
         run: |
           rm -rf ./build/${{ matrix.targetPlatform }}/Galagan_BurstDebugInformation_DoNotShip/
+          chown -R $USER:$USER ./build
+          chmod -R 777 ./build
           mv ./build/${{ matrix.targetPlatform}}/ ./build/Galagan/
 
       - name: Upload artifact
