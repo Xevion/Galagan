@@ -1,6 +1,7 @@
 # Repository
 .idea/**
 /Galagan/.idea/**
+*.zip
 
 # This .gitignore file should be placed at the root of your Unity project directory
 #
