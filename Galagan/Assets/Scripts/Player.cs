@@ -1,5 +1,7 @@
 using System;
+using System.Collections;
 using UnityEngine;
+using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
 
 public class Player : MonoBehaviour
@@ -7,6 +9,7 @@ public class Player : MonoBehaviour
     private LineRenderer _lineRenderer;
     private PolygonCollider2D _polygonCollider;
     private Rigidbody2D _rigidbody;
+    private AudioSource _audioSource;
 
     private float _minX;
     private float _maxX;
@@ -20,6 +23,7 @@ public class Player : MonoBehaviour
         _lineRenderer = GetComponent<LineRenderer>();
         _polygonCollider = GetComponent<PolygonCollider2D>();
         _rigidbody = GetComponent<Rigidbody2D>();
+        _audioSource = GetComponent<AudioSource>();
 
         _lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
         _lineRenderer.startColor = Color.white;
@@ -30,11 +34,25 @@ public class Player : MonoBehaviour
     private void Start()
     {
         GenerateShape();
+        
+        StartCoroutine(LoadAudio());
 
         var cam = Camera.main!;
         const float inset = 0.05f;
         _minX = cam.ScreenToWorldPoint(new Vector3(cam.pixelWidth * inset, 0, cam.nearClipPlane)).x;
         _maxX = cam.ScreenToWorldPoint(new Vector3(cam.pixelWidth * (1f - inset), 0, cam.nearClipPlane)).x;
+    }
+
+    private IEnumerator LoadAudio()
+    {
+        var assetPath = $"file://{Application.streamingAssetsPath}/Audio/Music";
+        var www = UnityWebRequestMultimedia.GetAudioClip($"{assetPath}/Neon Doom - Steven O'Brien.mp3", AudioType.MPEG);
+        yield return www.SendWebRequest();
+        
+        _audioSource.clip = DownloadHandlerAudioClip.GetContent(www);
+        _audioSource.loop = true;
+        _audioSource.Play();
+        
     }
 
     private void GenerateShape()
@@ -66,6 +84,9 @@ public class Player : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if (transform.position.y < -15f)
+            Destroy(gameObject);
+        
         _rigidbody.velocity = Vector2.zero;
         transform.position += new Vector3(Input.GetAxis("Horizontal") * 0.4f, 0, 0);
 

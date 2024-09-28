@@ -12,6 +12,9 @@ public class Asteroid : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if (transform.position.y < -15f)
+            Destroy(gameObject);
+        
         // If asteroids get too slow or stop, begin adding force to correct
         if (_rigidbody.velocity.y > -0.1f)
         {
