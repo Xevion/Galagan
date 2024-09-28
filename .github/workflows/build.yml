@@ -12,7 +12,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    strategy:matrix:
+    strategy:
+      matrix:
         unityVersion:
           - 2022.3.42f1
         targetPlatform:
