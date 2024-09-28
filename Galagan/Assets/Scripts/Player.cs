@@ -7,9 +7,9 @@ public class Player : MonoBehaviour
     private LineRenderer _lineRenderer;
     private PolygonCollider2D _polygonCollider;
     private Rigidbody2D _rigidbody;
-    
-    private float minX;
-    private float maxX;
+
+    private float _minX;
+    private float _maxX;
 
     [Range(0.01f, 1.2f)] public float shipWidth = 1.3f;
     [Range(0.01f, 1.2f)] public float shipHeight = 0.8f;
@@ -27,23 +27,18 @@ public class Player : MonoBehaviour
         _lineRenderer.useWorldSpace = false;
     }
 
-    void Start()
+    private void Start()
     {
-        for (var i = 0; i < SceneManager.sceneCount; i++)
-        {
-            Debug.Log(SceneManager.GetSceneAt(i).name);
-        }
         GenerateShape();
 
-        var cam = Camera.main;
-        var inset = 0.05f;
-        minX = cam.ScreenToWorldPoint(new Vector3(cam.pixelWidth * inset, 0, cam.nearClipPlane)).x;
-        maxX = cam.ScreenToWorldPoint(new Vector3(cam.pixelWidth * (1f - inset), 0, cam.nearClipPlane)).x;
+        var cam = Camera.main!;
+        const float inset = 0.05f;
+        _minX = cam.ScreenToWorldPoint(new Vector3(cam.pixelWidth * inset, 0, cam.nearClipPlane)).x;
+        _maxX = cam.ScreenToWorldPoint(new Vector3(cam.pixelWidth * (1f - inset), 0, cam.nearClipPlane)).x;
     }
 
-    void GenerateShape()
+    private void GenerateShape()
     {
-
         var points = new[]
         {
             new Vector2(0, shipHeight),
@@ -66,11 +61,11 @@ public class Player : MonoBehaviour
         if (collision.gameObject.CompareTag("Asteroid"))
         {
             // Load main menu
-            var index = UnityEngine.SceneManagement.SceneManager.GetSceneByName("MenuScene").buildIndex;
+            var index = SceneManager.GetSceneByName("MenuScene").buildIndex;
             // Only error in proper builds
-            
-            // if (index == -1 && 
-            // UnityEngine.SceneManagement.SceneManager.LoadScene(index);
+
+            if (index != -1)
+                SceneManager.LoadScene(index);
         }
     }
 
@@ -78,12 +73,11 @@ public class Player : MonoBehaviour
     {
         _rigidbody.velocity = Vector2.zero;
         transform.position += new Vector3(Input.GetAxis("Horizontal") * 0.4f, 0, 0);
-        
-        // Prevent moving off screen
-        if (transform.position.x > maxX)
-            transform.position = new Vector3(maxX, transform.position.y, transform.position.z);
-        else if (transform.position.x < minX)
-            transform.position = new Vector3(minX, transform.position.y, transform.position.z);
-            
+
+        // Prevent moving off-screen
+        if (transform.position.x > _maxX)
+            transform.position = new Vector3(_maxX, transform.position.y, transform.position.z);
+        else if (transform.position.x < _minX)
+            transform.position = new Vector3(_minX, transform.position.y, transform.position.z);
     }
 }
