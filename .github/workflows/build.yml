@@ -46,10 +46,10 @@ jobs:
 
       - name: Fix Build Folder
         run: |
-          rm -rf ./build/${{ matrix.targetPlatform }}/Galagan_BurstDebugInformation_DoNotShip/
-          chown -R $USER:$USER ./build
-          chmod -R 777 ./build
-          mv ./build/${{ matrix.targetPlatform}}/ ./build/Galagan/
+          sudo rm -rf ./build/${{ matrix.targetPlatform }}/Galagan_BurstDebugInformation_DoNotShip/
+          # sudo chown -R $USER:$USER ./build
+          # sudo chmod -R 777 ./build
+          sudo mv ./build/${{ matrix.targetPlatform}}/ ./build/Galagan/
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
