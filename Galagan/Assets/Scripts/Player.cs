@@ -60,12 +60,7 @@ public class Player : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Asteroid"))
         {
-            // Load main menu
-            var index = SceneManager.GetSceneByName("MenuScene").buildIndex;
-            // Only error in proper builds
-
-            if (index != -1)
-                SceneManager.LoadScene(index);
+            SceneManager.LoadScene("Scenes/MenuScene", LoadSceneMode.Single);
         }
     }
 
