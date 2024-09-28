@@ -1,8 +1,4 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
 
 [RequireComponent(typeof(LineRenderer), typeof(Collider2D))]
@@ -39,7 +35,7 @@ public class Shaper : MonoBehaviour
     {
         _lineRenderer = GetComponent<LineRenderer>();
         _polygonCollider = GetComponent<PolygonCollider2D>();
-        
+
         GenerateLine();
     }
 
@@ -47,7 +43,7 @@ public class Shaper : MonoBehaviour
     {
         _lineRenderer.positionCount = 0;
         _lineRenderer.loop = true;
-        
+
         // Calculate points for circle
         var pointCount = Random.Range(pointCountLow, pointCountHigh);
         _lineRenderer.positionCount = pointCount;
@@ -55,9 +51,11 @@ public class Shaper : MonoBehaviour
         var previousRadius = radius;
 
         // Generate points
-        for (var i = 0; i < pointCount; i++) {
+        for (var i = 0; i < pointCount; i++)
+        {
             var rad = Mathf.Deg2Rad * (i * 360f / pointCount);
-            var pointRadius = previousRadius * maxChange + (radius + Random.Range(jaggedLow, jaggedHigh)) * (1f - maxChange);
+            var pointRadius = previousRadius * maxChange +
+                              (radius + Random.Range(jaggedLow, jaggedHigh)) * (1f - maxChange);
             points[i] = new Vector3(Mathf.Sin(rad) * pointRadius, Mathf.Cos(rad) * pointRadius, 0);
             previousRadius = pointRadius;
         }
@@ -65,13 +63,14 @@ public class Shaper : MonoBehaviour
         // Add points to LineRenderer
         _lineRenderer.SetPositions(points);
 
-        // Use the linerenderer's Vector3's to create vector2 collider path
+        // Use the line-renderer's Vector3's to create vector2 collider path
         var path = new Vector2[_lineRenderer.positionCount + 1];
         for (var i = 0; i < pointCount; i++)
         {
             // Convert Vector3 to Vector2
             path[i] = points[i];
         }
+
         path[_lineRenderer.positionCount] = path[0];
         _polygonCollider.SetPath(0, path);
     }
