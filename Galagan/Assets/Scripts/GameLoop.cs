@@ -1,5 +1,7 @@
+using System.Collections;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Networking;
 
 public class GameLoop : MonoBehaviour
 {
@@ -15,6 +17,10 @@ public class GameLoop : MonoBehaviour
 
     private int _score;
     public TextMeshProUGUI scoreText;
+    
+    private AudioClip[] _audioClips;
+
+    private AudioSource _audioSource;
 
     public int Score
     {
@@ -25,19 +31,53 @@ public class GameLoop : MonoBehaviour
                 scoreText = GameObject.Find("ScoreText").GetComponent<TextMeshProUGUI>();
             
             _score = value;
-            scoreText.text = $"{_score}";
+            scoreText.text = $"{Score}";
+
+            if (value > 0)
+            {
+                var index = value <= 27 ? value : Random.Range(1, 28);
+                _audioSource.PlayOneShot(_audioClips[index - 1]);
+            }
+        }
+    }
+
+    private IEnumerator LoadAudio()
+    {
+        var assetPath = $"file://{Application.streamingAssetsPath}/Audio/Sounds";
+        for (var i = 1; i <= 27; i++)
+        {
+            var www = UnityWebRequestMultimedia.GetAudioClip($"{assetPath}/{i}.wav", AudioType.WAV);
+            yield return www.SendWebRequest();
+            
+            if (www.error != null)
+            {
+                Debug.LogError($"Failed to load audio clip {i}: {www.error}");
+                continue;
+            }
+            
+            _audioClips[i - 1] = DownloadHandlerAudioClip.GetContent(www);
+            _audioClips[i - 1].name = $"{i}.wav";
+            
+            if (i == 27)
+            {
+                Debug.Log("All audio clips loaded");
+            }
         }
     }
 
     private void Start()
     {
         _layerMask = LayerMask.GetMask("Asteroid", "Points");
+        _audioSource = GetComponent<AudioSource>();
+        _audioClips = new AudioClip[27];
+        
+        StartCoroutine(LoadAudio());
         
         InvokeRepeating(nameof(SpawnAsteroids), 0, 1.4f);
         InvokeRepeating(nameof(SpawnPoints), 0, 1f);
             
         // Get screen corners
-        var cam = Camera.main;
+        var cam = Camera.main!;
         var topLeft = cam.ScreenToWorldPoint(new Vector3(0, cam.pixelHeight, cam.nearClipPlane));
         var topRight = cam.ScreenToWorldPoint(new Vector3(cam.pixelWidth, cam.pixelHeight * inset, cam.nearClipPlane));
         _spawningRight = topRight.x * 0.8f;
