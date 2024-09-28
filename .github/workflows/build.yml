@@ -17,8 +17,8 @@ jobs:
         unityVersion:
           - 2022.3.42f1
         targetPlatform:
-          # - WebGL
-          # - StandaloneLinux64
+          - WebGL
+          - StandaloneLinux64
           - StandaloneWindows64
           # - StandaloneOSX
 
@@ -26,7 +26,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         with:
           path: ./Galagan/Library
           key: ${{ runner.os }}-Library-${{ hashFiles('./Galagan/ProjectSettings/ProjectSettings.asset') }}
@@ -44,8 +44,13 @@ jobs:
           unityVersion: ${{ matrix.unityVersion }}
           targetPlatform: ${{ matrix.targetPlatform }}
 
+      - name: Fix Build Folder
+        run: |
+          rm -rf ./build/${{ matrix.targetPlatform }}/Galagan_BurstDebugInformation_DoNotShip/
+          mv ./build/${{ matrix.targetPlatform}}/ ./build/Galagan/
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: galagan-${{ matrix.targetPlatform }}
-          path: build/${{ matrix.targetPlatform }}
+          path: build/
