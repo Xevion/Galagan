@@ -26,12 +26,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # Unity builds take some time, so we do some caching to make builds faster
       - uses: actions/cache@v4
         with:
-          path: ./Galagan/Library
-          key: ${{ runner.os }}-Library-${{ hashFiles('./Galagan/ProjectSettings/ProjectSettings.asset') }}
+          path: ./Galagan/Library/
+          key: Library-Galagan-${{ matrix.unityVersion }}-${{ matrix.targetPlatform }}-${{ hashFiles('./Galagan/ProjectSettings/ProjectSettings.asset') }}
           restore-keys: |
-            ${{ runner.os }}-Library-
+            Library-Galagan-${{ matrix.unityVersion }}-${{ hashFiles('./Galagan/ProjectSettings/ProjectSettings.asset') }}
+            Library-Galagan-${{ matrix.unityVersion }}-
+            Library-Galagan-
 
       - name: Build Unity Project
         uses: game-ci/unity-builder@v4
